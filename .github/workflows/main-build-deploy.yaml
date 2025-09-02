@@ -38,3 +38,27 @@ jobs:
       - name: Create tag (minor por padrão)
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: minor
+      - name: Tag Docker image com versão
+        run: |
+          docker tag spring-6-gateway ${{ secrets.DOCKER_USERNAME }}/spring-6-gateway:${{ steps.tag_version.outputs.new_tag }}
+          docker tag spring-6-gateway ${{ secrets.DOCKER_USERNAME }}/spring-6-gateway:latest
+      - name: Push Docker image com versão
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/spring-6-gateway:${{ steps.tag_version.outputs.new_tag }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/spring-6-gateway:latest
+
+  deploy_k8s:
+    needs: build_and_deploy
+    runs-on: self-hosted
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+      - name: Undeploy serviço/deployment antigos (ignora erro se não existir)
+        run: |
+          kubectl delete service gateway --ignore-not-found
+          kubectl delete deployment gateway --ignore-not-found
+      - name: Deploy no Kubernetes local
+        run: kubectl apply -f k8s/deployment.yaml
