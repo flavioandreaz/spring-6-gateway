@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Spring6GatewayApplication {
 
     public static void main(String[] args) {
-        System.out.println("Starting Gateway Application....");
+        System.out.println("Starting Gateway Application.....");
         SpringApplication.run(Spring6GatewayApplication.class, args);
     }
 
